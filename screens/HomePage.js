@@ -17,7 +17,7 @@ const HomePage = () => {
 
   const handleSubmit = () => {
     console.log('Field Details:', fieldDetails);
-    // Perform further actions, such as sending the data to a backend here
+    
   };
 
   return (

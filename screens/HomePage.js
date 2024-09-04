@@ -1,73 +1,103 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Button, StyleSheet, Alert } from 'react-native';
+import * as Location from 'expo-location';
+import MapView, { Polygon, Marker } from 'react-native-maps';
+import * as turf from '@turf/turf'; // Turf is now correctly used
 
 const HomePage = () => {
-  const [fieldDetails, setFieldDetails] = useState({
-    fieldName: '',
-    areaSize: '',
-    cropType: '',
-  });
+  const [location, setLocation] = useState(null);
+  const [region, setRegion] = useState(null);
+  const [polygonCoords, setPolygonCoords] = useState([]);
 
-  const handleChange = (name, value) => {
-    setFieldDetails({
-      ...fieldDetails,
-      [name]: value,
-    });
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      setRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    })();
+  }, []);
+
+  const handleMapPress = (e) => {
+    const newCoords = [...polygonCoords, e.nativeEvent.coordinate];
+    setPolygonCoords(newCoords);
   };
 
-  const handleSubmit = () => {
-    console.log('Field Details:', fieldDetails);
+  const calculatePolygonArea = (coordinates) => {
+    // Ensure the coordinates form a closed loop by adding the first coordinate to the end
+    const polygonCoords = [...coordinates, coordinates[0]];
     
+    // Convert the coordinates into a format suitable for Turf.js
+    const turfPolygon = turf.polygon([polygonCoords.map(coord => [coord.longitude, coord.latitude])]);
+    
+    // Calculate the area in square meters
+    const areaInSquareMeters = turf.area(turfPolygon);
+    
+    // Convert the area to acres (optional)
+    const areaInAcres = areaInSquareMeters / 4046.86; // 1 acre = 4046.86 square meters
+    
+    return areaInAcres;
+  };
+
+  const calculateArea = () => {
+    if (polygonCoords.length < 3) {
+      Alert.alert('Error', 'You need at least 3 points to calculate an area.');
+      return;
+    }
+    const area = calculatePolygonArea(polygonCoords);
+    Alert.alert('Area', `The estimated area is: ${area.toFixed(2)} acres`);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Enter Crop Field Details</Text>
-      
-      <Text style={styles.label}>Field Name:</Text>
-      <TextInput
-        style={styles.input}
-        value={fieldDetails.fieldName}
-        onChangeText={(value) => handleChange('fieldName', value)}
-        placeholder="Enter Field Name"
-      />
-      
-      <Text style={styles.label}>Area Size (in acres):</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        value={fieldDetails.areaSize}
-        onChangeText={(value) => handleChange('areaSize', value)}
-        placeholder="Enter Area Size"
-      />
+      {region ? (
+        <MapView
+          style={styles.map}
+          initialRegion={region}
+          onPress={handleMapPress}
+        >
+          {location && (
+            <Marker
+              coordinate={{
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              }}
+              title="Your Location"
+            />
+          )}
 
-      <Text style={styles.label}>Type of Crop:</Text>
-      <TextInput
-        style={styles.input}
-        value={fieldDetails.cropType}
-        onChangeText={(value) => handleChange('cropType', value)}
-        placeholder="Enter Crop Type"
-      />
+          {polygonCoords.length > 0 && (
+            <Polygon
+              coordinates={polygonCoords}
+              fillColor="rgba(0, 200, 0, 0.3)"
+              strokeColor="green"
+              strokeWidth={2}
+            />
+          )}
+        </MapView>
+      ) : null}
 
-      <Button title="Submit" onPress={handleSubmit} />
+      <Button title="Calculate Area" onPress={calculateArea} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
   },
-  label: {
-    fontSize: 18,
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    padding: 10,
-    marginBottom: 20,
-    borderRadius: 5,
+  map: {
+    flex: 1,
   },
 });
 

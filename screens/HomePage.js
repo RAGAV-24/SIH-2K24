@@ -55,7 +55,11 @@ const HomePage = ({ navigation }) => {
 
   const calculateArea = () => {
     const area = calculatePolygonArea(polygonCoords);
-    navigation.navigate('CropDetails', { area: area.toFixed(2) });
+    if (area && polygonCoords.length > 0) {
+      navigation.navigate('CropDetails', { area: area.toFixed(2), polygonCoords });
+    } else {
+      Alert.alert('Error', 'Please select an area on the map first.');
+    }
   };
 
   return (

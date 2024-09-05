@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Button, StyleSheet, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Polygon, Marker } from 'react-native-maps';
-import * as turf from '@turf/turf'; // Turf is now correctly used
+import * as turf from '@turf/turf'; // Import turf for geospatial calculations
 
-const HomePage = () => {
+const HomePage = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [region, setRegion] = useState(null);
   const [polygonCoords, setPolygonCoords] = useState([]);
@@ -34,28 +34,28 @@ const HomePage = () => {
   };
 
   const calculatePolygonArea = (coordinates) => {
-    // Ensure the coordinates form a closed loop by adding the first coordinate to the end
-    const polygonCoords = [...coordinates, coordinates[0]];
-    
-    // Convert the coordinates into a format suitable for Turf.js
-    const turfPolygon = turf.polygon([polygonCoords.map(coord => [coord.longitude, coord.latitude])]);
-    
+    if (coordinates.length < 3) {
+      return 0; // Can't calculate area with less than 3 points
+    }
+
+    // Ensure the polygon is closed
+    const closedCoords = [...coordinates, coordinates[0]];
+
+    // Convert coordinates to the format required by turf.js
+    const turfPolygon = turf.polygon([closedCoords.map(coord => [coord.longitude, coord.latitude])]);
+
     // Calculate the area in square meters
     const areaInSquareMeters = turf.area(turfPolygon);
-    
+
     // Convert the area to acres (optional)
-    const areaInAcres = areaInSquareMeters / 4046.86; // 1 acre = 4046.86 square meters
-    
+    const areaInAcres = areaInSquareMeters / 4046.86;
+
     return areaInAcres;
   };
 
   const calculateArea = () => {
-    if (polygonCoords.length < 3) {
-      Alert.alert('Error', 'You need at least 3 points to calculate an area.');
-      return;
-    }
     const area = calculatePolygonArea(polygonCoords);
-    Alert.alert('Area', `The estimated area is: ${area.toFixed(2)} acres`);
+    navigation.navigate('CropDetails', { area: area.toFixed(2) });
   };
 
   return (
@@ -63,6 +63,7 @@ const HomePage = () => {
       {region ? (
         <MapView
           style={styles.map}
+          mapType="satellite" // Set mapType to "satellite" for satellite view
           initialRegion={region}
           onPress={handleMapPress}
         >

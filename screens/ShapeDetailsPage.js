@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import MapView, { Polygon, Marker, Polyline } from 'react-native-maps';
+import { useNavigation } from '@react-navigation/native'; // Import the hook
 
 const ShapeDetailsPage = ({ route }) => {
   const { polygonCoords = [], area = 0 } = route.params || {}; // Handle undefined values with default
 
+  const navigation = useNavigation(); // Initialize the navigation object
   const [markers, setMarkers] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
   const [isDrawingLine, setIsDrawingLine] = useState(false); // Toggle for drawing line
@@ -37,6 +39,16 @@ const ShapeDetailsPage = ({ route }) => {
     } else {
       Alert.alert('Error', 'No line to undo.');
     }
+  };
+
+  const navigateToNextPage = () => {
+    // Navigate to the next page (replace 'NextPage' with your actual page name)
+    navigation.navigate('PointMarkersPage', {
+      polygonCoords,
+      area,
+      markers,
+      lineCoords,
+    });
   };
 
   if (!polygonCoords.length) {
@@ -118,7 +130,7 @@ const ShapeDetailsPage = ({ route }) => {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={[styles.button, styles.submitButton]} onPress={() => Alert.alert('Shape, markers, and lines saved')}>
+      <TouchableOpacity style={[styles.button, styles.submitButton]} onPress={navigateToNextPage}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
     </View>

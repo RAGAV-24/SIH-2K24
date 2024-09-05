@@ -6,6 +6,7 @@ import SignupScreen from '../screens/SignupScreen';
 import MapScreen from '../screens/HomePage';
 import CropDetailsPage from '../screens/CropDetailsPage';
 import ShapeDetailsPage from '../screens/ShapeDetailsPage';
+import PointMarkersPage from '../screens/PointMarkersPage';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Home" component={MapScreen} />
         <Stack.Screen name="CropDetails" component={CropDetailsPage} />
         <Stack.Screen name="ShapeDetails" component={ShapeDetailsPage} />
+        <Stack.Screen name="PointMarkersPage" component={PointMarkersPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );

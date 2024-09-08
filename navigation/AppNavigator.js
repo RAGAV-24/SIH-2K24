@@ -7,6 +7,8 @@ import MapScreen from '../screens/HomePage';
 import CropDetailsPage from '../screens/CropDetailsPage';
 import ShapeDetailsPage from '../screens/ShapeDetailsPage';
 import PointMarkersPage from '../screens/PointMarkersPage';
+import Dashboard from '../screens/Dashboard';
+import HeatMap from '../screens/HeatMap';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +22,9 @@ export default function AppNavigator() {
         <Stack.Screen name="CropDetails" component={CropDetailsPage} />
         <Stack.Screen name="ShapeDetails" component={ShapeDetailsPage} />
         <Stack.Screen name="PointMarkersPage" component={PointMarkersPage} />
+        <Stack.Screen name="Dashboard" component={Dashboard} />
+        <Stack.Screen name="Heatmap" component={HeatMap} />
+     
       </Stack.Navigator>
     </NavigationContainer>
   );

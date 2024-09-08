@@ -1,45 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import MapView, { Marker, Polyline, Polygon } from 'react-native-maps';
-
-// Haversine formula to calculate distance between two coordinates
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371e3; // Earth radius in meters
-  const rad = Math.PI / 180;
-  const dLat = (lat2 - lat1) * rad;
-  const dLon = (lon2 - lon1) * rad;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in meters
-};
-
-// Function to calculate markers along the edges
-const calculateMarkers = (lineCoords, distanceInterval) => {
-  let markers = [];
-  let remainingDistance = distanceInterval;
-  
-  for (let i = 1; i < lineCoords.length; i++) {
-    const start = lineCoords[i - 1];
-    const end = lineCoords[i];
-    const totalSegmentDistance = calculateDistance(start.latitude, start.longitude, end.latitude, end.longitude);
-
-    while (remainingDistance < totalSegmentDistance) {
-      const ratio = remainingDistance / totalSegmentDistance;
-      const latitude = start.latitude + ratio * (end.latitude - start.latitude);
-      const longitude = start.longitude + ratio * (end.longitude - start.longitude);
-
-      markers.push({ latitude, longitude });
-      remainingDistance += distanceInterval;
-    }
-
-    remainingDistance -= totalSegmentDistance;
-  }
-
-  return markers;
-};
 
 // Function to calculate centroid of a polygon
 const calculateCentroid = (coords) => {
@@ -55,34 +16,50 @@ const calculateCentroid = (coords) => {
   };
 };
 
-const PointMarkersPage = ({ route }) => {
-  const { polygonCoords, area, lineCoords } = route.params; // Receiving polygonCoords and area
-  const [edgeMarkers, setEdgeMarkers] = useState([]);
+const PointMarkersPage = ({ route, navigation }) => {
+  const { polygonCoords, lineCoords } = route.params;
   const [innerMarkers, setInnerMarkers] = useState([]);
-  const distanceInterval = 50; // Distance interval in meters
+  const [gateValves, setGateValves] = useState([]);
+  const [isAddingGateValve, setIsAddingGateValve] = useState(false);
+  const [sensorCount, setSensorCount] = useState(0); // Track the number of sensors
 
   useEffect(() => {
-    const generatedEdgeMarkers = calculateMarkers(lineCoords, distanceInterval);
-    setEdgeMarkers(generatedEdgeMarkers);
-
-    // Generate markers inside the polygon
     const centroid = calculateCentroid(polygonCoords);
-    const generatedInnerMarkers = polygonCoords.map((coord, index) => {
+    const generatedInnerMarkers = polygonCoords.map((coord) => {
       const midLat = (coord.latitude + centroid.latitude) / 2;
       const midLon = (coord.longitude + centroid.longitude) / 2;
       return { latitude: midLat, longitude: midLon };
     });
-
     setInnerMarkers(generatedInnerMarkers);
-  }, [lineCoords, polygonCoords]);
+    setSensorCount(generatedInnerMarkers.length); // Update sensor count
+  }, [polygonCoords]);
+
+  const handleMapPress = (event) => {
+    const { coordinate } = event.nativeEvent;
+
+    if (isAddingGateValve) {
+      setGateValves([...gateValves, coordinate]);
+      Alert.alert('Gate Valve Added', 'Gate Valve has been placed on the pipeline.');
+    }
+  };
+
+  const toggleAddingGateValveMode = () => {
+    setIsAddingGateValve(!isAddingGateValve);
+  };
+
+  const handleSubmit = () => {
+    console.log("Submit button pressed");
+    // Pass polygonCoords along with gateValves and sensorCount to Dashboard
+    navigation.navigate('Dashboard', { gateValves, sensorCount, polygonCoords });
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>SENSOR PLACING AREAS</Text>
-
       <MapView
         style={styles.map}
         mapType="satellite"
+        onPress={handleMapPress}
         initialRegion={{
           latitude: polygonCoords[0]?.latitude || 0,
           longitude: polygonCoords[0]?.longitude || 0,
@@ -90,7 +67,6 @@ const PointMarkersPage = ({ route }) => {
           longitudeDelta: 0.01,
         }}
       >
-        {/* Display Polygon */}
         {polygonCoords && polygonCoords.length > 0 && (
           <Polygon
             coordinates={polygonCoords}
@@ -100,7 +76,6 @@ const PointMarkersPage = ({ route }) => {
           />
         )}
 
-        {/* Display Polyline */}
         {lineCoords.length > 1 && (
           <Polyline
             coordinates={lineCoords}
@@ -109,17 +84,15 @@ const PointMarkersPage = ({ route }) => {
           />
         )}
 
-        {/* Display Edge Markers */}
-        {edgeMarkers.map((marker, index) => (
+        {gateValves.map((valve, index) => (
           <Marker
-            key={`edge-${index}`}
-            coordinate={marker}
+            key={`gate-valve-${index}`}
+            coordinate={valve}
             pinColor="green"
-            title={`Edge Point ${index + 1}`}
+            title={`Gate Valve ${index + 1}`}
           />
         ))}
 
-        {/* Display Inner Markers */}
         {innerMarkers.map((marker, index) => (
           <Marker
             key={`inner-${index}`}
@@ -130,7 +103,24 @@ const PointMarkersPage = ({ route }) => {
         ))}
       </MapView>
 
-      {/* Legend for the markers */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, isAddingGateValve ? styles.selectedButton : styles.addButton]}
+          onPress={toggleAddingGateValveMode}
+        >
+          <Text style={styles.buttonText}>
+            {isAddingGateValve ? 'Stop Adding Gate Valve' : 'Add Gate Valve'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleSubmit}
+        >
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.legendContainer}>
         <Text style={styles.legendTitle}>POINTS</Text>
         <View style={styles.legendItem}>
@@ -161,6 +151,32 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ddd',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  button: {
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  selectedButton: {
+    backgroundColor: '#27ae60',
+  },
+  addButton: {
+    backgroundColor: '#9b59b6',
+  },
+  submitButton: {
+    backgroundColor: '#e74c3c',
   },
   legendContainer: {
     marginTop: 10,

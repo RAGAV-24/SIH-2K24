@@ -46,7 +46,7 @@ const ShapeDetailsPage = ({ route }) => {
     navigation.navigate('PointMarkersPage', {
       polygonCoords,
       area,
-      markers,
+      markers,  // Pass the markers to the next page
       lineCoords,
     });
   };

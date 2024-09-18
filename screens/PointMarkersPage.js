@@ -114,7 +114,7 @@ const PointMarkersPage = ({ route, navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.submitButton}
+          style={styles.buttonText}
           onPress={handleSubmit}
         >
           <Text style={styles.buttonText}>Submit</Text>
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     marginBottom: 10,
-    color:'white'
+    color: 'white',
   },
   map: {
     height: 400,
@@ -154,31 +154,30 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column', // Stack buttons vertically
+    alignItems: 'center', // Center buttons horizontally
     marginVertical: 10,
   },
   button: {
     padding: 15,
     borderRadius: 8,
-    width:15,
+    width: '100%', // Ensure buttons take full width of the container
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    marginHorizontal: 5,
+    marginVertical: 5, // Space between buttons
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
   },
   selectedButton: {
-    backgroundColor: '#27ae60',
+    backgroundColor: '#27ae60', // Green color for adding gate valve
   },
   addButton: {
-    backgroundColor: '#9b59b6',
+    backgroundColor: '#9b59b6', // Purple color for adding gate valve
   },
   submitButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#e74c3c', // Red color for submit button
   },
   legendContainer: {
     marginTop: 10,

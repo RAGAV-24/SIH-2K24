@@ -30,7 +30,7 @@ export default function AppNavigator() {
         <Drawer.Screen name="Home" component={MapScreen} />
         <Drawer.Screen name="CropDetails" component={CropDetailsPage} />
         <Drawer.Screen name="ShapeDetails" component={ShapeDetailsPage} />
-        <Drawer.Screen name="PointMarkers" component={PointMarkersPage} />
+        <Drawer.Screen name="PointMarkersPage" component={PointMarkersPage} />
         <Drawer.Screen name="Dashboard" component={Dashboard} />
         <Drawer.Screen name="HeatMap" component={HeatMap} />
         <Drawer.Screen name="WaterMonitoring" component={WaterMonitoring} />

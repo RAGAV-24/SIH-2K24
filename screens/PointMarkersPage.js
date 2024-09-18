@@ -140,11 +140,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f4f4f8',
+    backgroundColor: 'black',
   },
   label: {
     fontSize: 18,
     marginBottom: 10,
+    color:'white'
   },
   map: {
     height: 400,
@@ -160,6 +161,7 @@ const styles = StyleSheet.create({
   button: {
     padding: 15,
     borderRadius: 8,
+    width:15,
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,

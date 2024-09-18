@@ -48,18 +48,24 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
+    color:'black',
+    backgroundColor: '#212121', // Added a dark background color
   },
   label: {
     fontSize: 18,
     marginBottom: 10,
     fontWeight: 'bold',
+    color: 'white', // Changed the text color to white
   },
   input: {
     borderWidth: 1,
-    borderColor: '#cccccc',
+    borderColor: 'black', // Changed the border color to a dark gray
+    color:'black',
     padding: 10,
     marginBottom: 20,
-    borderRadius: 5,
+    borderRadius: 10,
+    backgroundColor: 'black', // Added a dark background color
+    color: '#ffffff', // Changed the text color to white
   },
 });
 

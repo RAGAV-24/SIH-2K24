@@ -50,21 +50,24 @@ const LoginScreen = ({ navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: '#212121', // Changed to a dark gray or black color
   },
   input: {
     height: 40,
-    borderColor: '#ddd',
-    borderBottomWidth: 1,
+    borderColor: 'white', // Changed to a dark gray color
+    borderBottomWidth: 50,
     marginBottom: 10,
+    backgroundColor: '#2b2b2b', // Added a dark background color
+    color: 'black', // Changed the text color to white
+    borderRadius: 5, // Added a border radius for a more professional look
   },
   error: {
-    color: 'red',
+    color: '#ff3737', // Changed to a lighter shade of red
   },
 });
 

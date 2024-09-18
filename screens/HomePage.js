@@ -97,9 +97,22 @@ const HomePage = ({ navigation }) => {
   );
 };
 
+// Adding navigation options for the header styling
+HomePage.navigationOptions = {
+  title: 'Home', // Set the title to "Home" for the navigation header
+  headerStyle: {
+    backgroundColor: '#121212', // Dark background for the header
+  },
+  headerTintColor: '#fff', // White text for the header
+  headerTitleStyle: {
+    fontWeight: 'bold',
+  },
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#121212', // Added a dark background color
   },
   map: {
     flex: 1,

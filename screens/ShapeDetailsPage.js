@@ -141,18 +141,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f4f4f8',
+    backgroundColor: 'black',
+    color:'white'
   },
   label: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
+    color: 'white',
   },
   areaText: {
     fontSize: 16,
     marginBottom: 20,
-    color: '#555',
+    color: 'white',
   },
   map: {
     height: 400,

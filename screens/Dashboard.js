@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Switch, TouchableOpacity, ActivityIndicator, Sc
 const Dashboard = ({ route, navigation }) => {
   const { gateValves = [], sensorCount = 0, polygonCoords = [] } = route.params || {};
 
-  // Default values for data and sensorData
+  // Default values for data
   const defaultData = {
     temperature: 22.5,
     soilMoistureReadings: [20.0, 35.0, 25.0],
@@ -12,7 +12,7 @@ const Dashboard = ({ route, navigation }) => {
     timestamp: new Date().toLocaleTimeString()
   };
 
-  const defaultSensorData = Array.from({ length: sensorCount }, (_, index) => ({
+  const initialSensorData = Array.from({ length: sensorCount }, (_, index) => ({
     id: index + 1,
     temperature: defaultData.temperature + Math.random() * 5 - 2.5, // Example variation
     soilMoisture: defaultData.soilMoistureReadings[Math.floor(Math.random() * defaultData.soilMoistureReadings.length)],
@@ -23,7 +23,7 @@ const Dashboard = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const [isAuto, setIsAuto] = useState(true);
   const [valveStates, setValveStates] = useState(gateValves.map(() => false));
-  const [sensorData, setSensorData] = useState(defaultSensorData);
+  const [sensorData, setSensorData] = useState(initialSensorData);
 
   useEffect(() => {
     // Simulate a data fetch
@@ -31,7 +31,7 @@ const Dashboard = ({ route, navigation }) => {
       setLoading(true);
       setTimeout(() => {
         setData(defaultData); // Use default values
-        setSensorData(defaultSensorData); // Use default sensor data
+        setSensorData(initialSensorData); // Use default sensor data
         setLoading(false);
       }, 1000); // Simulate network delay
     };
@@ -39,8 +39,24 @@ const Dashboard = ({ route, navigation }) => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    // Update sensor data every second
+    const intervalId = setInterval(() => {
+      setSensorData(prevData =>
+        prevData.map(sensor => ({
+          ...sensor,
+          temperature: defaultData.temperature + Math.random() * 5 - 2.5, // Example variation
+          soilMoisture: defaultData.soilMoistureReadings[Math.floor(Math.random() * defaultData.soilMoistureReadings.length)],
+          groundWaterLevel: defaultData.groundWaterLevel + Math.random() * 3 - 1.5 // Example variation
+        }))
+      );
+    }, 1000); // 1 second interval
+
+    return () => clearInterval(intervalId); // Clean up interval on component unmount
+  }, []);
+
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator size="large" color="#3498db" />;
   }
 
   const temperature = data?.temperature ?? 'N/A';
@@ -82,7 +98,7 @@ const Dashboard = ({ route, navigation }) => {
           style={styles.button}
           onPress={() => {
             if (polygonCoords.length > 0 && sensorData.length > 0) {
-              navigation.navigate('Heatmap', { polygonCoords, sensorData });
+              navigation.navigate('HeatMap', { polygonCoords, sensorData });
             } else {
               console.log('No polygonCoords or sensorData available');
             }

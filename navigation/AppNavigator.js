@@ -16,7 +16,7 @@ const Drawer = createDrawerNavigator();
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Dashboard" screenOptions={{
+      <Drawer.Navigator initialRouteName="Login" screenOptions={{
           drawerStyle: {
             backgroundColor: '#000', // Set background color to black
           },

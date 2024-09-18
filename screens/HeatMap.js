@@ -40,11 +40,11 @@ const HeatMap = ({ route }) => {
     longitudeDelta: 0.0421,
   };
 
-  // Ensure heatmap points are distributed across the polygon
-  const heatmapData = sensorData.map((sensor, index) => ({
-    latitude: sensor.latitude ?? polygonCoords[index % polygonCoords.length].latitude, 
-    longitude: sensor.longitude ?? polygonCoords[index % polygonCoords.length].longitude, 
-    intensity: sensor.groundWaterLevel ?? 0.5, // Default intensity if no value is available
+  // Generate heatmap points based on sensor data
+  const heatmapData = sensorData.map(sensor => ({
+    latitude: sensor.latitude ?? (polygonCoords[0]?.latitude || 0), 
+    longitude: sensor.longitude ?? (polygonCoords[0]?.longitude || 0), 
+    intensity: sensor.groundWaterLevel ?? 0.5, // Intensity based on sensor data
   }));
 
   return (
@@ -70,8 +70,8 @@ const HeatMap = ({ route }) => {
           radius={50}
           opacity={0.7}
           gradient={{
-            colors: ['red', 'green', 'yellow', 'blue'],
-            startPoints: [0.1, 0.3, 0.5, 0.7],
+            colors: ['blue', 'cyan', 'lime', 'yellow', 'red'],
+            startPoints: [0.1, 0.3, 0.5, 0.7, 1.0],
             colorMapSize: 256,
           }}
         />

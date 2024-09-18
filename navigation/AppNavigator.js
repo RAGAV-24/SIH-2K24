@@ -16,7 +16,14 @@ const Drawer = createDrawerNavigator();
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Dashboard">
+      <Drawer.Navigator initialRouteName="Dashboard" screenOptions={{
+          drawerStyle: {
+            backgroundColor: '#000', // Set background color to black
+          },
+          drawerLabelStyle: {
+            color: '#fff', // Set drawer label color to white for contrast
+          },
+        }}>
         {/* Directly add all the screens into the Drawer */}
         <Drawer.Screen name="Login" component={LoginScreen} />
         <Drawer.Screen name="Signup" component={SignupScreen} />

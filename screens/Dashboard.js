@@ -4,96 +4,113 @@ import { View, Text, StyleSheet, Switch, TouchableOpacity, ActivityIndicator, Sc
 const Dashboard = ({ route, navigation }) => {
   const { gateValves = [], sensorCount = 0, polygonCoords = [] } = route.params || {};
 
-  // Default values for data
   const defaultData = {
-    temperature: 22.5,
-    soilMoistureReadings: [20.0, 35.0, 25.0],
+    temperature: 32.5,
+    soilMoistureReadings: [55.0, 58.0, 53.0],
     groundWaterLevel: 15.0,
-    timestamp: new Date().toLocaleTimeString()
+    timestamp: new Date().toLocaleTimeString(),
   };
 
-  const initialSensorData = Array.from({ length: sensorCount }, (_, index) => ({
-    id: index + 1,
-    temperature: defaultData.temperature + Math.random() * 5 - 2.5, // Example variation
-    soilMoisture: defaultData.soilMoistureReadings[Math.floor(Math.random() * defaultData.soilMoistureReadings.length)],
-    groundWaterLevel: defaultData.groundWaterLevel + Math.random() * 3 - 1.5 // Example variation
-  }));
+  const initialSensorData = [
+    { id: 1, depth: '1', temperature: defaultData.temperature + Math.random() * 5 - 2.5, soilMoisture: defaultData.soilMoistureReadings[Math.floor(Math.random() * defaultData.soilMoistureReadings.length)] },
+    { id: 2, depth: '2 feet', temperature: defaultData.temperature + Math.random() * 5 - 2.5, soilMoisture: defaultData.soilMoistureReadings[Math.floor(Math.random() * defaultData.soilMoistureReadings.length)] },
+    { id: 3, depth: '3 feet', temperature: defaultData.temperature + Math.random() * 5 - 2.5, soilMoisture: defaultData.soilMoistureReadings[Math.floor(Math.random() * defaultData.soilMoistureReadings.length)] },
+  ];
 
   const [data, setData] = useState(defaultData);
   const [loading, setLoading] = useState(false);
   const [isAuto, setIsAuto] = useState(true);
   const [valveStates, setValveStates] = useState(gateValves.map(() => false));
   const [sensorData, setSensorData] = useState(initialSensorData);
+  const [motorStatus, setMotorStatus] = useState(false);
 
   useEffect(() => {
-    // Simulate a data fetch
     const loadData = () => {
       setLoading(true);
       setTimeout(() => {
-        setData(defaultData); // Use default values
-        setSensorData(initialSensorData); // Use default sensor data
+        setData(defaultData);
+        setSensorData(initialSensorData);
         setLoading(false);
-      }, 1000); // Simulate network delay
+      }, 3000);
     };
 
     loadData();
   }, []);
 
   useEffect(() => {
-    // Update sensor data every second
     const intervalId = setInterval(() => {
-      setSensorData(prevData =>
-        prevData.map(sensor => ({
+      setSensorData((prevData) =>
+        prevData.map((sensor) => ({
           ...sensor,
-          temperature: defaultData.temperature + Math.random() * 5 - 2.5, // Example variation
+          temperature: defaultData.temperature + Math.random() * 5 - 2.5,
           soilMoisture: defaultData.soilMoistureReadings[Math.floor(Math.random() * defaultData.soilMoistureReadings.length)],
-          groundWaterLevel: defaultData.groundWaterLevel + Math.random() * 3 - 1.5 // Example variation
         }))
       );
-    }, 1000); // 1 second interval
+    }, 1000);
 
-    return () => clearInterval(intervalId); // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#3498db" />;
+    return <ActivityIndicator size="large" color="#1abc9c" />;
   }
 
-  const temperature = data?.temperature ?? 'N/A';
   const groundWaterLevel = data?.groundWaterLevel ?? 'N/A';
   const timestamp = data?.timestamp ?? 'N/A';
 
-  const averageSoilMoisture = data?.soilMoistureReadings.length > 0
-    ? (data.soilMoistureReadings.reduce((sum, value) => sum + value, 0) / data.soilMoistureReadings.length).toFixed(2)
-    : 'N/A';
-
   const handleValveToggle = (index) => {
-    setValveStates(prevStates => {
+    setValveStates((prevStates) => {
       const newStates = [...prevStates];
       newStates[index] = !newStates[index];
       return newStates;
     });
   };
 
+  const handleMotorToggle = () => {
+    setMotorStatus((prevStatus) => !prevStatus);
+  };
+
+  const sortedSensorData = sensorData.sort((a, b) => a.id - b.id);
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Sensor Dashboard</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Temperature:</Text>
-          <Text style={styles.value}>{temperature} °C</Text>
+        {/* Soil Moisture Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Moisture</Text>
+          <View style={styles.rowContainer}>
+            {sortedSensorData.map((sensor) => (
+              <View key={sensor.id} style={styles.sensorContainer}>
+                <Text style={styles.value}>{sensor.depth}</Text>
+                <Text style={styles.value}>{sensor.soilMoisture.toFixed(1)} %</Text>
+              </View>
+            ))}
+          </View>
         </View>
-        <View style={styles.card}>
-          <Text style={styles.label}>Soil Moisture (Avg):</Text>
-          <Text style={styles.value}>{averageSoilMoisture} %</Text>
+
+        {/* Temperature Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Temperature</Text>
+          <View style={styles.rowContainer}>
+            {sortedSensorData.map((sensor) => (
+              <View key={sensor.id} style={styles.sensorContainer}>
+                <Text style={styles.value}>{sensor.depth}</Text>
+                <Text style={styles.value}>{sensor.temperature.toFixed(1)} °C</Text>
+              </View>
+            ))}
+          </View>
         </View>
+
+        {/* Ground Water Level Section */}
         <View style={styles.card}>
           <Text style={styles.label}>Ground Water Level:</Text>
-          <Text style={styles.value}>{groundWaterLevel} meters</Text>
+          <Text style={styles.value}>3.25 feet        36,688 lit     5% filled</Text>
         </View>
         <Text style={styles.timestamp}>Last Updated: {timestamp}</Text>
 
+        {/* Heatmap Button */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
@@ -104,11 +121,28 @@ const Dashboard = ({ route, navigation }) => {
             }
           }}
         >
-          <Text style={styles.buttonText}>Heatmap</Text>
+          <Text style={styles.buttonText}>View Heatmap</Text>
         </TouchableOpacity>
 
+        {/* Motor Status Section */}
+        <View style={styles.motorStatusContainer}>
+          <Text style={styles.sectionTitle}>Motor Status</Text>
+          <View style={styles.motorStatusRow}>
+            <Switch
+              value={motorStatus}
+              onValueChange={handleMotorToggle}
+              thumbColor={motorStatus ? '#4caf50' : '#f44336'}
+              trackColor={{ false: '#767577', true: '#81c784' }}
+            />
+            <Text style={[styles.value, styles.motorStatusText]}>
+              {motorStatus ? 'Motor is ON' : 'Motor is OFF'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Gate Valves Section */}
         <View style={styles.gateContainer}>
-          <Text style={styles.label}>Gate Valves:</Text>
+          <Text style={styles.sectionTitle}>Gate Valves</Text>
           {gateValves.map((valve, index) => (
             <View key={`gate-valve-${index}`} style={styles.gateRow}>
               <Text style={styles.value}>Gate Valve {index + 1}:</Text>
@@ -125,15 +159,9 @@ const Dashboard = ({ route, navigation }) => {
             </View>
           ))}
         </View>
-
-        <View style={styles.card}>
-          <Text style={styles.label}>Sensors:</Text>
-          {sensorData.map((sensor) => (
-            <Text key={sensor.id} style={styles.value}>Sensor {sensor.id} - Temp: {sensor.temperature.toFixed(1)} °C, Soil Moisture: {sensor.soilMoisture.toFixed(1)} %, Ground Water Level: {sensor.groundWaterLevel.toFixed(1)} meters</Text>
-          ))}
-        </View>
       </ScrollView>
 
+      {/* Mode Toggle Section */}
       <View style={styles.toggleContainer}>
         <Text style={styles.label}>Mode:</Text>
         <Switch
@@ -152,7 +180,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '',
+    backgroundColor: '#1e1e1e', // Dark background
   },
   scrollContainer: {
     flexGrow: 1,
@@ -161,30 +189,42 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#ecf0f1', // Light text color
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#ecf0f1',
   },
   card: {
     padding: 15,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#34495e', // Dark card background
     marginBottom: 10,
-    borderColor: '#ddd',
+    borderColor: '#7f8c8d',
     borderWidth: 1,
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#ecf0f1',
   },
   value: {
     fontSize: 16,
     marginTop: 5,
+    color: '#ecf0f1',
   },
   timestamp: {
     fontSize: 14,
     marginTop: 10,
-    color: '#777',
+    color: '#bdc3c7',
   },
   button: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#2980b9', // Button color
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -212,6 +252,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 20,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  sensorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#34495e', // Dark sensor container background
+    marginHorizontal: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#7f8c8d',
+  },
+  motorStatusContainer: {
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#34495e', // Dark card background
+    marginBottom: 20,
+    borderColor: '#7f8c8d',
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  motorStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  motorStatusText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ecf0f1',
+    marginLeft: 10,
   },
 });
 

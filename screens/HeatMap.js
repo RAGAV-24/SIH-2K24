@@ -1,87 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MapView, { Heatmap, Polygon } from 'react-native-maps';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import yourImage from '../assets/finHeatmap.png'; // Adjust the path as needed
 
-const HeatMap = ({ route }) => {
-  const navigation = useNavigation();
-  const { polygonCoords = [], sensorData = [] } = route.params || {};
-
-  if (!sensorData.length) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>No sensor data available for the heatmap</Text>
-      </View>
-    );
-  }
-
-  // Calculate the bounds of the polygon to fit the map
-  const getBounds = (coords) => {
-    const lats = coords.map(coord => coord.latitude);
-    const longs = coords.map(coord => coord.longitude);
-
-    const north = Math.max(...lats);
-    const south = Math.min(...lats);
-    const east = Math.max(...longs);
-    const west = Math.min(...longs);
-
-    return {
-      latitude: (north + south) / 2,
-      longitude: (east + west) / 2,
-      latitudeDelta: north - south + 0.1,
-      longitudeDelta: east - west + 0.1,
-    };
-  };
-
-  const region = polygonCoords.length > 0 ? getBounds(polygonCoords) : {
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  };
-
-  // Generate heatmap points based on sensor data
-  const heatmapData = sensorData.map(sensor => ({
-    latitude: sensor.latitude ?? (polygonCoords[0]?.latitude || 0), 
-    longitude: sensor.longitude ?? (polygonCoords[0]?.longitude || 0), 
-    intensity: sensor.groundWaterLevel ?? 0.5, // Intensity based on sensor data
-  }));
-
+const HeatMap = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Heatmap</Text>
-      <MapView
-        style={styles.map}
-        initialRegion={region}
-        mapType="satellite"
-        showsCompass={true}
-        showsScale={true}
-      >
-        {polygonCoords.length > 0 && (
-          <Polygon
-            coordinates={polygonCoords}
-            strokeColor="#000"
-            strokeWidth={2}
-            fillColor="rgba(255,0,0,0.2)"
-          />
-        )}
-        <Heatmap
-          points={heatmapData}
-          radius={50}
-          opacity={0.7}
-          gradient={{
-            colors: ['blue', 'cyan', 'lime', 'yellow', 'red'],
-            startPoints: [0.1, 0.3, 0.5, 0.7, 1.0],
-            colorMapSize: 256,
-          }}
-        />
-      </MapView>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('WaterMonitoring')}
-      >
-        <Text style={styles.buttonText}>Water Monitoring System</Text>
-      </TouchableOpacity>
+      <Text style={styles.title}>Heat Map Component</Text>
+      <Image source={yourImage} style={styles.image} resizeMode="cover" />
+      {/* Add more content for your HeatMap here */}
     </View>
   );
 };
@@ -89,33 +15,20 @@ const HeatMap = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1e1e1e', // Dark background
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    margin: 15,
-    color: '#fff',
+    color: '#ecf0f1',
+    marginBottom: 20,
   },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#ff3737',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  button: {
-    backgroundColor: '#3498db',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    margin: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+  image: {
+    width: '100%', // Full width
+    height: '100%', // Full height
+    borderRadius: 0, // Remove border radius for full screen
   },
 });
 

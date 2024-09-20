@@ -2,18 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import MapView, { Marker, Polyline, Polygon } from 'react-native-maps';
 
-// Function to calculate centroid of a polygon
-const calculateCentroid = (coords) => {
-  let latSum = 0;
-  let lonSum = 0;
-  coords.forEach((coord) => {
-    latSum += coord.latitude;
-    lonSum += coord.longitude;
-  });
+// Function to calculate the midpoint of two coordinates
+const calculateMidpoint = (coord1, coord2) => {
   return {
-    latitude: latSum / coords.length,
-    longitude: lonSum / coords.length,
+    latitude: (coord1.latitude + coord2.latitude) / 2,
+    longitude: (coord1.longitude + coord2.longitude) / 2,
   };
+};
+
+// Ray-casting algorithm to check if a point is inside a polygon
+const isPointInPolygon = (point, polygon) => {
+  let x = point.latitude;
+  let y = point.longitude;
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    let xi = polygon[i].latitude, yi = polygon[i].longitude;
+    let xj = polygon[j].latitude, yj = polygon[j].longitude;
+
+    let intersect = ((yi > y) !== (yj > y)) &&
+                    (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
 };
 
 const PointMarkersPage = ({ route, navigation }) => {
@@ -24,12 +34,18 @@ const PointMarkersPage = ({ route, navigation }) => {
   const [sensorCount, setSensorCount] = useState(0); // Track the number of sensors
 
   useEffect(() => {
-    const centroid = calculateCentroid(polygonCoords);
-    const generatedInnerMarkers = polygonCoords.map((coord) => {
-      const midLat = (coord.latitude + centroid.latitude) / 2;
-      const midLon = (coord.longitude + centroid.longitude) / 2;
-      return { latitude: midLat, longitude: midLon };
-    });
+    // Generate midpoints of polygon edges
+    const generatedInnerMarkers = polygonCoords.map((coord, index) => {
+      const nextIndex = (index + 1) % polygonCoords.length; // To form a closed loop
+      const midpoint = calculateMidpoint(coord, polygonCoords[nextIndex]);
+
+      // Check if the midpoint is inside the polygon (optional check for extra safety)
+      if (isPointInPolygon(midpoint, polygonCoords)) {
+        return midpoint;
+      }
+      return null;
+    }).filter(Boolean); // Remove null values
+
     setInnerMarkers(generatedInnerMarkers);
     setSensorCount(generatedInnerMarkers.length); // Update sensor count
   }, [polygonCoords]);
@@ -98,7 +114,7 @@ const PointMarkersPage = ({ route, navigation }) => {
             key={`inner-${index}`}
             coordinate={marker}
             pinColor="orange"
-            title={`Inner Point ${index + 1}`}
+            title={`Sensor Point ${index + 1}`}
           />
         ))}
       </MapView>
@@ -154,30 +170,30 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   buttonContainer: {
-    flexDirection: 'column', // Stack buttons vertically
-    alignItems: 'center', // Center buttons horizontally
+    flexDirection: 'column',
+    alignItems: 'center',
     marginVertical: 10,
   },
   button: {
     padding: 15,
     borderRadius: 8,
-    width: '100%', // Ensure buttons take full width of the container
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 5, // Space between buttons
+    marginVertical: 5,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
   },
   selectedButton: {
-    backgroundColor: '#27ae60', // Green color for adding gate valve
+    backgroundColor: '#27ae60',
   },
   addButton: {
-    backgroundColor: '#9b59b6', // Purple color for adding gate valve
+    backgroundColor: '#9b59b6',
   },
   submitButton: {
-    backgroundColor: '#e74c3c', // Red color for submit button
+    backgroundColor: '#e74c3c',
   },
   legendContainer: {
     marginTop: 10,

@@ -1,6 +1,6 @@
 // screens/LoginScreen.js
 import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
@@ -26,48 +26,82 @@ const LoginScreen = ({ navigation }) => {
         {({ handleChange, handleSubmit, values, errors, touched }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, touched.email && errors.email ? styles.inputError : null]}
               placeholder="Email"
+              placeholderTextColor="#999"
               onChangeText={handleChange('email')}
               value={values.email}
+              autoCapitalize="none"
+              keyboardType="email-address"
             />
             {touched.email && errors.email && <Text style={styles.error}>{errors.email}</Text>}
             
             <TextInput
-              style={styles.input}
+              style={[styles.input, touched.password && errors.password ? styles.inputError : null]}
               placeholder="Password"
+              placeholderTextColor="#999"
               secureTextEntry
               onChangeText={handleChange('password')}
               value={values.password}
             />
             {touched.password && errors.password && <Text style={styles.error}>{errors.password}</Text>}
             
-            <Button title="Login" onPress={handleSubmit} />
-            <Button title="Go to Signup" onPress={() => navigation.navigate('Signup')} />
+            <TouchableOpacity style={styles.loginButton} onPress={handleSubmit}>
+              <Text style={styles.loginButtonText}>Login</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+              <Text style={styles.signupText}>Go to Signup</Text>
+            </TouchableOpacity>
           </>
         )}
       </Formik>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#212121', // Changed to a dark gray or black color
+    backgroundColor: '#212121', // Dark background
   },
   input: {
-    height: 40,
-    borderColor: 'white', // Changed to a dark gray color
-    borderBottomWidth: 50,
-    marginBottom: 10,
-    backgroundColor: '#2b2b2b', // Added a dark background color
-    color: 'black', // Changed the text color to white
-    borderRadius: 5, // Added a border radius for a more professional look
+    height: 50,
+    borderColor: '#444', // Subtle border color
+    borderBottomWidth: 1, // Bottom border for professional look
+    marginBottom: 15,
+    backgroundColor: '#2b2b2b', // Dark background for input
+    color: 'white', // White text
+    paddingHorizontal: 10, // Added padding inside input
+    borderRadius: 5,
+  },
+  inputError: {
+    borderColor: '#ff3737', // Border color for error state
   },
   error: {
-    color: '#ff3737', // Changed to a lighter shade of red
+    color: '#ff3737', // Lighter shade of red for errors
+    marginBottom: 10,
+    fontSize: 12,
+  },
+  loginButton: {
+    backgroundColor: '#6200EE', // Dark purple button
+    paddingVertical: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  signupText: {
+    color: '#BBB', // Light gray text for "Go to Signup"
+    textAlign: 'center',
+    marginTop: 10,
+    fontSize: 14,
   },
 });
 

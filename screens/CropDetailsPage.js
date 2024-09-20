@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 const CropDetailsPage = ({ route, navigation }) => {
   const { area, polygonCoords } = route.params || {};
@@ -25,19 +26,21 @@ const CropDetailsPage = ({ route, navigation }) => {
       <Text style={styles.label}>Crop Details</Text>
 
       <Text style={styles.label}>Calculated Area (in acres):</Text>
-      <TextInput
-        style={styles.input}
-        value={area ? area.toString() : ''}
-        editable={false}
-      />
+      <Text style={styles.value}>{area ? area.toString() : 'N/A'}</Text>
 
       <Text style={styles.label}>Type of Crop:</Text>
-      <TextInput
-        style={styles.input}
-        value={cropType}
-        onChangeText={setCropType}
-        placeholder="Enter Crop Type"
-      />
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={cropType}
+          onValueChange={(itemValue) => setCropType(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select Crop" value="" />
+          <Picker.Item label="Coconut" value="Coconut" />
+          <Picker.Item label="Banana" value="Banana" />
+          <Picker.Item label="Sugarcane" value="Sugarcane" />
+        </Picker>
+      </View>
 
       <Button title="Submit" onPress={handleSubmit} />
     </View>
@@ -48,7 +51,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    color:'black',
     backgroundColor: '#212121', // Added a dark background color
   },
   label: {
@@ -57,15 +59,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white', // Changed the text color to white
   },
-  input: {
-    borderWidth: 1,
-    borderColor: 'black', // Changed the border color to a dark gray
-    color:'black',
-    padding: 10,
+  value: {
+    fontSize: 16,
+    color: '#ffffff',
     marginBottom: 20,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#555',
     borderRadius: 10,
-    backgroundColor: 'black', // Added a dark background color
+    backgroundColor: '#333',
+    marginBottom: 20,
+  },
+  picker: {
     color: '#ffffff', // Changed the text color to white
+    height: 50,
   },
 });
 

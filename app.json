@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "sih",
-    "slug": "sih",
+    "name": "Millilitre",
+    "slug": "Millilitre",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Millilitre.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/Millilitre.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
